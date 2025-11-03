@@ -1,28 +1,54 @@
 module Main where
+
 import Types
 import Persistence
-import MenuAdmin   
-import MenuPaciente 
+import MenuAdmin
+import MenuPaciente
+import MenuMedico
 
+-- ponto de entrada do sistema
 main :: IO ()
 main = do
   putStrLn "=== Mini-SUS: Sistema de Atendimento Simplificado ==="
-  -- carregar os persistentes 
-  pacientes    <- loadFile "data/pacientes.db"    :: IO [Paciente]
-  medicos      <- loadFile "data/medicos.db"      :: IO [Medico]
-  atendimentos <- loadFile "data/atendimentos.db" :: IO [Atendimento]
-  menuInicial pacientes medicos atendimentos
+  putStrLn "Carregando dados..."
+  pacientes    <- carregarPacientes
+  medicos      <- carregarMedicos
+  atendimentos <- carregarAtendimentos
+  prescricoes  <- carregarPrescricoes
+  agendas      <- carregarAgendas
+  putStrLn "Dados carregados com sucesso."
+  menuInicial pacientes medicos atendimentos prescricoes agendas
 
-menuInicial :: [Paciente] -> [Medico] -> [Atendimento] -> IO ()
-menuInicial pacientes medicos atendimentos = do
+-- menu inicial de login e acesso
+menuInicial
+  :: [Paciente]
+  -> [Medico]
+  -> [Atendimento]
+  -> [Prescricao]
+  -> [AgendaMedico]
+  -> IO ()
+menuInicial pacientes medicos atendimentos prescricoes agendas = do
   putStrLn "\n=== Login Inicial ==="
   putStrLn "1) Administrador"
   putStrLn "2) Paciente"
+  putStrLn "3) Médico"
   putStrLn "q) Sair"
   putStr "Escolha: "
   opcao <- getLine
   case opcao of
-    "1" -> loginAdmin pacientes medicos atendimentos        --- abrir a função do menu para administrador 
-    "2" -> loginPacienteMenu pacientes medicos atendimentos -- abrir a função pra médicos
-    "q" -> putStrLn "Encerrando o Mini-SUS..."
-    _   -> putStrLn "Opção inválida!" >> menuInicial pacientes medicos atendimentos
+    "1" -> do
+      loginAdmin pacientes medicos atendimentos prescricoes agendas
+      menuInicial pacientes medicos atendimentos prescricoes agendas
+    "2" -> do
+      menuPaciente pacientes medicos atendimentos prescricoes agendas
+      menuInicial pacientes medicos atendimentos prescricoes agendas
+    "3" -> do
+      menuLoginMedico medicos atendimentos agendas prescricoes
+      menuInicial pacientes medicos atendimentos prescricoes agendas
+    "q" -> do
+      putStrLn "Salvando dados e encerrando o Mini-SUS..."
+      salvarTudo pacientes medicos atendimentos prescricoes agendas
+      putStrLn "✅ Encerrado com sucesso."
+    _   -> do
+      putStrLn "Opção inválida!"
+      menuInicial pacientes medicos atendimentos prescricoes agendas
