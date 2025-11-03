@@ -7,9 +7,6 @@ import Scheduling
 import Data.List (filter)
 import System.IO (hFlush, stdout)
 
--- ============================================================
--- LOGIN DO MÉDICO
--- ============================================================
 
 menuLoginMedico :: [Medico] -> [Atendimento] -> [AgendaMedico] -> [Prescricao] -> IO ()
 menuLoginMedico medicos atendimentos agendas prescricoes = do
@@ -23,9 +20,6 @@ menuLoginMedico medicos atendimentos agendas prescricoes = do
       putStrLn $ "\nBem-vindo, Dr(a). " ++ nomeM m ++ "!"
       menuMedico m atendimentos agendas prescricoes
 
--- ============================================================
--- MENU PRINCIPAL DO MÉDICO
--- ============================================================
 
 menuMedico :: Medico -> [Atendimento] -> [AgendaMedico] -> [Prescricao] -> IO ()
 menuMedico medicoObj atendimentos agendas prescricoes = do
@@ -58,9 +52,6 @@ menuMedico medicoObj atendimentos agendas prescricoes = do
     "0" -> putStrLn "Saindo do menu do médico..."
     _   -> putStrLn "Opção inválida." >> menuMedico medicoObj atendimentos agendas prescricoes
 
--- ============================================================
--- VER CONSULTAS DA SEMANA
--- ============================================================
 
 listarMinhasConsultas :: Medico -> [Atendimento] -> IO ()
 listarMinhasConsultas med atds = do
@@ -80,9 +71,6 @@ listarMinhasConsultas med atds = do
           ++ " | Tipo: "
           ++ show (tipoAtendimento a)
 
--- ============================================================
--- LIBERAR HORÁRIOS
--- ============================================================
 
 liberarHorariosFlow :: Medico -> [AgendaMedico] -> IO [AgendaMedico]
 liberarHorariosFlow med agendas = do
@@ -100,9 +88,6 @@ liberarHorariosFlow med agendas = do
   putStrLn "\n[OK] Horários liberados com sucesso!"
   return agendas'
 
--- ============================================================
--- VISUALIZAR PRESCRIÇÕES
--- ============================================================
 
 listarPrescricoesDoMedico :: String -> [Prescricao] -> IO ()
 listarPrescricoesDoMedico crmMed prescrs = do
@@ -115,10 +100,6 @@ listarPrescricoesDoMedico crmMed prescrs = do
     printPresc p =
       putStrLn $
         prData p ++ " - Paciente: " ++ prPaciente p ++ "\n" ++ "→ " ++ prTexto p ++ "\n"
-
--- ============================================================
--- MARCAR CONSULTA COMO REALIZADA
--- ============================================================
 
 marcarConsultaFeitaFlow :: Medico -> [Atendimento] -> IO [Atendimento]
 marcarConsultaFeitaFlow med atds = do
