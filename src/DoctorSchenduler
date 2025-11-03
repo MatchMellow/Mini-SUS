@@ -3,8 +3,7 @@ module DoctorSchedule where
 import Types
 import Data.List (find)
 
--- | Gera uma lista de horários com intervalo de 20 min
--- Exemplo: gerarSlots20min "Segunda" "08:00" "16:00"
+-- gera lista de horários de 20 em 20 min
 gerarSlots20min :: String -> String -> String -> [Slot]
 gerarSlots20min dia inicio fim =
   let minutosTot = toMin fim
@@ -28,8 +27,7 @@ gerarSlots20min dia inicio fim =
           mm' = if mm < 10 then '0':show mm else show mm
       in h' ++ ":" ++ mm'
 
--- | O médico libera um dia (ex.: "Segunda") das 08:00 às 16:00
--- e o sistema cria slots de 20 minutos.
+-- médico libera um dia (ex.: "Segunda") das 08:00 às 16:00
 liberarDiaMedico :: String -> String -> String -> [AgendaMedico] -> [AgendaMedico]
 liberarDiaMedico crm dia hIni hFim agendas =
   let novosSlots = gerarSlots20min dia hIni hFim
@@ -37,13 +35,13 @@ liberarDiaMedico crm dia hIni hFim agendas =
        Nothing ->
          AgendaMedico crm novosSlots : agendas
        Just ag ->
-         -- Sobrescreve apenas os slots daquele dia
+         -- sobrescreve só os slots daquele dia
          let outros = filter (\a -> agMedicoCRM a /= crm) agendas
              slotsFiltrados = filter (\s -> slDia s /= dia) (agSlots ag)
              slotsNovos     = slotsFiltrados ++ novosSlots
          in AgendaMedico crm slotsNovos : outros
 
--- | Quando o paciente agenda, este horário é marcado como ocupado.
+-- marcar um slot como ocupado
 ocuparSlot :: String -> String -> String -> [AgendaMedico] -> [AgendaMedico]
 ocuparSlot crm dia hora agendas =
   map atualiza agendas
