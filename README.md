@@ -14,7 +14,7 @@ Prover um modelo didático de sistema médico simples, com menus de texto, persi
 - `src/MenuPaciente.hs` — Menu do paciente.
 - `src/Main.hs` — Ponto de entrada do programa.
 
-Abra o terminal na raiz do projeto (`Mini-SUS`) e digite:
+Para os colaboradoresAbra o terminal na raiz do projeto (`Mini-SUS`) e digite:
 
 ```bash
 stack setup   
