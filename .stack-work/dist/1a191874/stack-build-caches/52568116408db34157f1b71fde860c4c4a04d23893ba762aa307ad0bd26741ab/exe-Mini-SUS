@@ -1,8 +1,26 @@
 C:\Mini-SUS\CHANGELOG.md:
   hash: 0b46ba80b71ae2ddb8054eb18dcc664c4266a3536fdec15403ddcc5a88186a48
 C:\Mini-SUS\Mini-SUS.cabal:
-  hash: d1cfb59fd89ee708de29ad382b2aa364c8e063cd93c5afb164f1a7e51ca25b11
+  hash: 53ea457b748976fce2639fb295afb0ecf802a2a8f4195c631cc211d6896341f0
 C:\Mini-SUS\README.md:
-  hash: ca0d9e2af3a019ca5a8ecbfab952c0d916472569d50958f528b36075f97abfd8
+  hash: d2d9c4b3e26d6d09948e945a3b34b2f6638459e763725c255d1ccc5eff6fcaf8
+C:\Mini-SUS\src\CRUD.hs:
+  hash: c80138be7a1b87c14e3a5f2641d59c67084a35b2e98f49630ca445348a3bbd67
+C:\Mini-SUS\src\DoctorSchedule.hs:
+  hash: b6f06f1c8e56aceb2c4c7039b6792f915061b3b36dfb863536b43ae83af07701
 C:\Mini-SUS\src\Main.hs:
-  hash: eb9c4b2352d440c3ccdbd803cdf2a0acb700c4b4a3ef301a3e7dec683cbda094
+  hash: 5924777acc1a176c43020657de4cf202132e7de2b3519178a02f07c2e5499b5b
+C:\Mini-SUS\src\MenuAdmin.hs:
+  hash: 2ad4d9f3a8dba911a11aa8d8d576c490d0ba62f672b336e3592b0786600bceb6
+C:\Mini-SUS\src\MenuMedico.hs:
+  hash: 76ec2f572a2bf71b158e32d4de462347fefed5f329eecf10a94c4fba190de979
+C:\Mini-SUS\src\MenuPaciente.hs:
+  hash: e6f48d27d9ee0ac689eba95ea1b7fa7f3c6690049d01b366f035ecbcaa6413f2
+C:\Mini-SUS\src\Persistence.hs:
+  hash: b21b72d99e99587f12b6005f9ecf851422523663d738530b98583e345093444f
+C:\Mini-SUS\src\Reports.hs:
+  hash: 8ddb76b79d71595574e04f53d8b5dd7e2dc657e31ebcae071ab854a7c3a15a7d
+C:\Mini-SUS\src\Scheduling.hs:
+  hash: d1f3453cedb2ff18396388d8cd4102bc90b7cefb0b2c27539db6b23608e80c31
+C:\Mini-SUS\src\Types.hs:
+  hash: 57a160a0ebef6453087148d669fa6fbf90f578c7fe1cc0e129e9ae90a6510488

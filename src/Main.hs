@@ -48,7 +48,7 @@ menuInicial pacientes medicos atendimentos prescricoes agendas = do
     "q" -> do
       putStrLn "Salvando dados e encerrando o Mini-SUS..."
       salvarTudo pacientes medicos atendimentos prescricoes agendas
-      putStrLn "✅ Encerrado com sucesso."
+      putStrLn "Encerrado com sucesso."
     _   -> do
       putStrLn "Opção inválida!"
       menuInicial pacientes medicos atendimentos prescricoes agendas

@@ -2,8 +2,6 @@ cabal-version:       2.2
 
 name:                Mini-SUS
 version:             0.1.0.0
--- synopsis:
--- description:
 homepage:            https://github.com/githubuser/Mini-SUS#readme
 license:             BSD-3-Clause
 license-file:        LICENSE
@@ -30,6 +28,16 @@ executable Mini-SUS
                        -Wmissing-home-modules
                        -Wpartial-fields
                        -Wredundant-constraints
+  other-modules:
+      Types
+      Persistence
+      CRUD
+      Scheduling
+      DoctorSchedule
+      Reports
+      MenuAdmin
+      MenuPaciente
+      MenuMedico
 
 source-repository head
   type:     git

@@ -1,13 +1,16 @@
 module MenuAdmin where
 
 import Types
-import CRUD
-import Scheduling
+import qualified CRUD            as CR
 import Reports
 import Persistence
+import DoctorSchedule
 import Data.List (find)
+import System.IO (hFlush, stdout)
 
--- login do administrador
+-- ===============================
+-- LOGIN DO ADMINISTRADOR
+-- ===============================
 loginAdmin
   :: [Paciente]
   -> [Medico]
@@ -16,10 +19,10 @@ loginAdmin
   -> [AgendaMedico]
   -> IO ()
 loginAdmin pacientes medicos atendimentos prescricoes agendas = do
-  putStrLn "\n=== Login Administrador ==="
-  putStr "Login: "
+  putStrLn "\n=== Login do Administrador ==="
+  putStr "Login: " >> hFlush stdout
   user <- getLine
-  putStr "Senha: "
+  putStr "Senha: " >> hFlush stdout
   senha <- getLine
   if user == "admin" && senha == "admin1230"
     then do
@@ -29,7 +32,9 @@ loginAdmin pacientes medicos atendimentos prescricoes agendas = do
       putStrLn "\n[ERRO] Usuário ou senha incorretos!"
       loginAdmin pacientes medicos atendimentos prescricoes agendas
 
--- menu principal do administrador
+-- ===============================
+-- MENU PRINCIPAL DO ADMIN
+-- ===============================
 menuAdmin
   :: [Paciente]
   -> [Medico]
@@ -38,75 +43,98 @@ menuAdmin
   -> [AgendaMedico]
   -> IO ()
 menuAdmin pacientes medicos atendimentos prescricoes agendas = do
-  putStrLn "\n=== Menu Administrador ==="
+  putStrLn "\n=== MENU ADMINISTRADOR ==="
   putStrLn "1) Cadastrar paciente"
   putStrLn "2) Excluir paciente"
   putStrLn "3) Cadastrar médico"
   putStrLn "4) Excluir médico"
-  putStrLn "5) Agendar consulta"
-  putStrLn "6) Cancelar consulta"
+  putStrLn "5) Agendar consulta (pelo CPF)"
+  putStrLn "6) Cancelar consulta (pelo CPF)"
   putStrLn "7) Relatórios"
   putStrLn "8) Gerenciar agenda médica"
-  putStrLn "9) Voltar ao menu inicial"
-  putStr "Escolha: "
-  opcao <- getLine
-  case opcao of
+  putStrLn "9) Voltar"
+  putStr   "Escolha: " >> hFlush stdout
+  op <- getLine
+  case op of
     "1" -> do
-      novosPacientes <- cadastrarPaciente pacientes
-      menuAdmin novosPacientes medicos atendimentos prescricoes agendas
-    "2" -> do
-      novosPacientes <- excluirPaciente pacientes
-      menuAdmin novosPacientes medicos atendimentos prescricoes agendas
-    "3" -> do
-      novosMedicos <- cadastrarMedico medicos
-      menuAdmin pacientes novosMedicos atendimentos prescricoes agendas
-    "4" -> do
-      novosMedicos <- excluirMedico medicos
-      menuAdmin pacientes novosMedicos atendimentos prescricoes agendas
-    "5" -> agendarConsultaAdmin pacientes medicos atendimentos prescricoes agendas
-    "6" -> cancelarConsultaAdmin pacientes medicos atendimentos prescricoes agendas
-    "7" -> menuRelatorios pacientes medicos atendimentos prescricoes agendas
-    "8" -> menuAgendaMedica medicos agendas >> menuAdmin pacientes medicos atendimentos prescricoes agendas
-    "9" -> putStrLn "\nVoltando ao menu inicial..."
-    _   -> putStrLn "[ERRO] Opção inválida!" >> menuAdmin pacientes medicos atendimentos prescricoes agendas
+      pacientes' <- CR.cadastrarPaciente pacientes
+      menuAdmin pacientes' medicos atendimentos prescricoes agendas
 
--- agendar uma consulta pelo admin
+    "2" -> do
+      pacientes' <- CR.excluirPaciente pacientes
+      menuAdmin pacientes' medicos atendimentos prescricoes agendas
+
+    "3" -> do
+      medicos' <- CR.cadastrarMedico medicos
+      menuAdmin pacientes medicos' atendimentos prescricoes agendas
+
+    "4" -> do
+      medicos' <- CR.excluirMedico medicos
+      menuAdmin pacientes medicos' atendimentos prescricoes agendas
+
+    "5" -> do
+      atendimentos' <- agendarConsultaAdmin pacientes medicos atendimentos
+      menuAdmin pacientes medicos atendimentos' prescricoes agendas
+
+    "6" -> do
+      atendimentos' <- cancelarConsultaAdmin pacientes atendimentos
+      menuAdmin pacientes medicos atendimentos' prescricoes agendas
+
+    "7" -> do
+      menuRelatorios pacientes medicos atendimentos prescricoes agendas
+      menuAdmin pacientes medicos atendimentos prescricoes agendas
+
+    "8" -> do
+      agendas' <- menuAgendaMedica medicos agendas
+      menuAdmin pacientes medicos atendimentos prescricoes agendas'
+
+    "9" -> putStrLn "Voltando ao menu inicial..."
+
+    _   -> putStrLn "[ERRO] Opção inválida!" >>
+            menuAdmin pacientes medicos atendimentos prescricoes agendas
+
+-- ===============================
+-- AGENDAR CONSULTA (ADMIN)
+-- ===============================
 agendarConsultaAdmin
   :: [Paciente]
   -> [Medico]
   -> [Atendimento]
-  -> [Prescricao]
-  -> [AgendaMedico]
-  -> IO ()
-agendarConsultaAdmin pacientes medicos atendimentos prescricoes agendas = do
-  putStr "Digite o CPF do paciente: "
-  c <- getLine
-  case find (\p -> cpf p == c) pacientes of
-    Nothing -> putStrLn "[ERRO] Paciente não encontrado!"
-    Just pacienteObj -> do
-      agendarConsulta pacienteObj medicos atendimentos
-      putStrLn "[OK] Consulta agendada."
-  menuAdmin pacientes medicos atendimentos prescricoes agendas
+  -> IO [Atendimento]
+agendarConsultaAdmin pacientes medicos atendimentos = do
+  putStr "CPF do paciente: " >> hFlush stdout
+  cpfPac <- getLine
+  case find (\p -> cpf p == cpfPac) pacientes of
+    Nothing -> do
+      putStrLn "[ERRO] Paciente não encontrado!"
+      return atendimentos
+    Just pac -> do
+      atendimentos' <- CR.agendarConsulta pac medicos atendimentos
+      putStrLn "[OK] Consulta agendada!"
+      return atendimentos'
 
--- cancelar consulta pelo admin
+-- ===============================
+-- CANCELAR CONSULTA (ADMIN)
+-- ===============================
 cancelarConsultaAdmin
   :: [Paciente]
-  -> [Medico]
   -> [Atendimento]
-  -> [Prescricao]
-  -> [AgendaMedico]
-  -> IO ()
-cancelarConsultaAdmin pacientes medicos atendimentos prescricoes agendas = do
-  putStr "Digite o CPF do paciente para cancelar: "
-  c <- getLine
-  case find (\p -> cpf p == c) pacientes of
-    Nothing -> putStrLn "[ERRO] Paciente não encontrado!"
-    Just pacienteObj -> do
-      cancelarConsulta pacienteObj atendimentos
-      putStrLn "[OK] Consulta cancelada."
-  menuAdmin pacientes medicos atendimentos prescricoes agendas
+  -> IO [Atendimento]
+cancelarConsultaAdmin pacientes atendimentos = do
+  putStr "CPF do paciente: " >> hFlush stdout
+  cpfPac <- getLine
+  case find (\p -> cpf p == cpfPac) pacientes of
+    Nothing -> do
+      putStrLn "[ERRO] Paciente não encontrado!"
+      return atendimentos
+    Just pac -> do
+      atendimentos' <- CR.cancelarConsulta pac atendimentos
+      putStrLn "[OK] Consulta cancelada!"
+      return atendimentos'
 
--- menu de relatórios do administrador
+-- ===============================
+-- RELATÓRIOS
+-- ===============================
 menuRelatorios
   :: [Paciente]
   -> [Medico]
@@ -115,42 +143,45 @@ menuRelatorios
   -> [AgendaMedico]
   -> IO ()
 menuRelatorios pacientes medicos atendimentos prescricoes agendas = do
-  putStrLn "\n=== Menu de Relatórios ==="
+  putStrLn "\n=== RELATÓRIOS ==="
   putStrLn "1) Histórico de paciente"
   putStrLn "2) Lista de médicos"
   putStrLn "3) Lista de consultas"
   putStrLn "4) Todas as prescrições"
   putStrLn "5) Agenda de um médico"
-  putStr "Escolha: "
-  opcao <- getLine
-  case opcao of
+  putStr   "Escolha: " >> hFlush stdout
+  op <- getLine
+  case op of
     "1" -> do
-      putStr "Digite o CPF do paciente: "
+      putStr "CPF do paciente: " >> hFlush stdout
       c <- getLine
       case find (\p -> cpf p == c) pacientes of
-        Nothing -> putStrLn "[ERRO] Paciente não encontrado!"
-        Just pacienteObj -> mostrarHistorico pacienteObj atendimentos
+        Nothing  -> putStrLn "[ERRO] Paciente não encontrado!"
+        Just pac -> mostrarHistorico pac atendimentos
     "2" -> relatorioMedicos medicos atendimentos
     "3" -> relatorioConsultas atendimentos
     "4" -> listarTodasPrescricoes prescricoes
     "5" -> do
-      putStr "Digite o CRM do médico: "
+      putStr "CRM do médico: " >> hFlush stdout
       crmMed <- getLine
       listarAgendaMedico crmMed agendas
     _   -> putStrLn "[ERRO] Opção inválida!"
 
--- menu para o administrador liberar agendas médicas
-menuAgendaMedica :: [Medico] -> [AgendaMedico] -> IO ()
+-- ===============================
+-- GERENCIAR AGENDA (ADMIN LIBERA HORÁRIOS)
+-- ===============================
+menuAgendaMedica :: [Medico] -> [AgendaMedico] -> IO [AgendaMedico]
 menuAgendaMedica medicos agendas = do
-  putStrLn "\n=== Gerenciamento de Agendas Médicas ==="
-  putStr "Digite o CRM do médico: "
+  putStrLn "\n=== Gerenciar Agenda Médica ==="
+  putStrLn "Médicos cadastrados:"
+  mapM_ (\m -> putStrLn $ "- " ++ crm m ++ " | " ++ nomeM m) medicos
+  putStr "CRM do médico: " >> hFlush stdout
   crmMed <- getLine
-  putStr "Dia da semana (ex.: Segunda): "
+  putStr "Dia (ex.: Segunda): " >> hFlush stdout
   dia <- getLine
-  putStr "Horário inicial (ex.: 08:00): "
+  putStr "Hora inicial (ex.: 08:00): " >> hFlush stdout
   hIni <- getLine
-  putStr "Horário final (ex.: 16:00): "
+  putStr "Hora final   (ex.: 16:00): " >> hFlush stdout
   hFim <- getLine
-  let novasAgendas = liberarDiaMedico crmMed dia hIni hFim agendas
-  salvarAgendas novasAgendas
-  putStrLn "[OK] Agenda atualizada com sucesso."
+  novasAgendas <- liberarDiaMedicoESalvar crmMed dia hIni hFim agendas
+  return novasAgendas

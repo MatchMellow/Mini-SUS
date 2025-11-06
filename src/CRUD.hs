@@ -1,175 +1,211 @@
 module CRUD where
+
 import Types
 import Persistence
-import Data.List (find, intercalate)
+import Data.List (find)
 import System.IO (hFlush, stdout)
 
+-- ==========================
+-- lista fixa de especialidades (bate com Types.hs)
+-- ==========================
+todasEspecialidades :: [Especialidade]
+todasEspecialidades =
+  [ AlergiaEImunologia
+  , Cardiologia
+  , CirurgiaGeral
+  , ClinicaMedica
+  , Dermatologia
+  , Endocrinologia
+  , Fisioterapia
+  , Gastroenterologia
+  , Genetica
+  , GinecologiaEObstetricia
+  , Hematologia
+  , Infectologia
+  , Neurologia
+  , Nutricao
+  , Oftalmologia
+  , OrtopediaETraumatologia
+  , Otorrinolaringologia
+  , Pediatria
+  , Psicologia
+  , Psiquiatria
+  , Reumatologia
+  ]
 
-
-
+-- ==========================
+-- PACIENTE
+-- ==========================
 cadastrarPaciente :: [Paciente] -> IO [Paciente]
-cadastrarPaciente pacientesList = do
+cadastrarPaciente pacientes = do
   putStrLn "\n=== Cadastro de Paciente ==="
-  putStr "Digite o nome completo: " >> hFlush stdout
-  n <- getLine
-  putStr "Digite o CPF (somente números): " >> hFlush stdout
-  c <- getLine
-  putStr "Digite a idade: " >> hFlush stdout
-  i <- readLn
-  putStr "Digite a senha: " >> hFlush stdout
-  s <- getLine
-  putStr "Deseja registrar convênio? (s/n): " >> hFlush stdout
+  putStr "Nome completo: " >> hFlush stdout
+  nomeP <- getLine
+  putStr "CPF: " >> hFlush stdout
+  cpfP <- getLine
+  putStr "Idade: " >> hFlush stdout
+  idadeP <- readLn
+  putStr "Senha: " >> hFlush stdout
+  senhaP <- getLine
+  putStr "Possui convênio? (s/n): " >> hFlush stdout
   resp <- getLine
-  conv <- if resp `elem` ["s","S"]
+  conv <-
+    if resp `elem` ["s","S"]
+      then do
+        putStr "Nome do plano: " >> hFlush stdout
+        plano <- getLine
+        putStr "Número da carteirinha (11 dígitos): " >> hFlush stdout
+        num <- getLine
+        if length num /= 11
           then do
-            putStr "Nome do plano: " >> hFlush stdout
-            nomePlano <- getLine
-            putStr "Número da carteira (11 dígitos): " >> hFlush stdout
-            num <- getLine
-            if length num /= 11
-              then do
-                putStrLn "Dado incorreto! Número da carteira inválido. Convênio será ignorado."
-                return Nothing
-              else return $ Just (Convenio nomePlano num)
-          else return Nothing
-  let pacienteNovo = Paciente n c i s conv []
-      lista = pacientesList ++ [pacienteNovo]
-  saveFile "data/pacientes.db" lista
-  putStrLn "Paciente cadastrado com sucesso!"
+            putStrLn "[AVISO] Número inválido. Convênio não será adicionado."
+            return Nothing
+          else return (Just (Convenio plano num))
+      else return Nothing
+  let novo = Paciente nomeP cpfP idadeP senhaP conv []
+      lista = pacientes ++ [novo]
+  salvarPacientes lista
+  putStrLn "[OK] Paciente cadastrado com sucesso!"
   return lista
 
--- Login paciente
-loginPacienteCRUD :: [Paciente] -> IO (Maybe Paciente)
-loginPacienteCRUD pacientesList = do
-  putStrLn "\n=== Login Paciente ==="
-  putStr "CPF: " >> hFlush stdout
-  c <- getLine
-  putStr "Senha: " >> hFlush stdout
-  s <- getLine
-  case find (\p -> cpf p == c && senha p == s) pacientesList of
-    Nothing -> putStrLn "Dado incorreto! CPF ou senha inválidos." >> return Nothing
-    Just pacienteObj -> do
-      putStrLn $ "Bem-vindo(a), " ++ nome pacienteObj ++ "!"
-      return $ Just pacienteObj
-
--- Excluir paciente
+  
 excluirPaciente :: [Paciente] -> IO [Paciente]
-excluirPaciente pacientesList = do
-  putStr "Digite o CPF do paciente que deseja excluir: " >> hFlush stdout
-  c <- getLine
-  case find (\p -> cpf p == c) pacientesList of
-    Nothing -> putStrLn "Dado incorreto! Paciente não encontrado." >> return pacientesList
-    Just _ -> do
-      let novaLista = filter (\p -> cpf p /= c) pacientesList
-      saveFile "data/pacientes.db" novaLista
-      putStrLn "Paciente excluído com sucesso!"
-      return novaLista
-
--- ======================
--- MÉDICOS
--- ======================
-
--- Cadastrar médico
-cadastrarMedico :: [Medico] -> IO [Medico]
-cadastrarMedico medicosList = do
-  putStrLn "\n=== Cadastro de Médico ==="
-  putStr "Nome do médico: " >> hFlush stdout
-  n <- getLine
-  putStr "CRM: " >> hFlush stdout
-  crmInput <- getLine
-  putStrLn "Escolha a especialidade:"
-  mapM_ (\(i,e) -> putStrLn $ show i ++ ") " ++ show e) (zip [1..] [ClinicoGeral .. Ortopedia])
-  putStr "Número da especialidade: " >> hFlush stdout
-  escolha <- readLn
-  if escolha < 1 || escolha > length [ClinicoGeral .. Ortopedia]
-    then putStrLn "Dado incorreto! Especialidade inválida." >> return medicosList
-    else do
-      let especialidadeSelecionada = [ClinicoGeral .. Ortopedia] !! (escolha - 1)
-      putStr "Informe os horários disponíveis (hh:mm separados por vírgula, ex: 08:00,09:00): " >> hFlush stdout
-      hrs <- getLine
-      let horariosSeparados = words $ map (\c -> if c == ',' then ' ' else c) hrs
-          medicoNovo = Medico n crmInput especialidadeSelecionada horariosSeparados
-          lista = medicosList ++ [medicoNovo]
-      saveFile "data/medicos.db" lista
-      putStrLn "Médico cadastrado com sucesso!"
-      return lista
-
--- Excluir médico (agora pelo nome)
-excluirMedico :: [Medico] -> IO [Medico]
-excluirMedico medicosList = do
-  putStrLn "\n=== Lista de Médicos ==="
-  mapM_ (\(i,m) -> putStrLn $ show i ++ ") " ++ nomeM m) (zip [1..] medicosList)
-  putStr "Digite o nome do médico que deseja excluir: " >> hFlush stdout
-  nomeInput <- getLine
-  case find (\m -> nomeM m == nomeInput) medicosList of
-    Nothing -> putStrLn "Dado incorreto! Médico não encontrado." >> return medicosList
-    Just _ -> do
-      let novaLista = filter (\m -> nomeM m /= nomeInput) medicosList
-      saveFile "data/medicos.db" novaLista
-      putStrLn "Médico excluído com sucesso!"
-      return novaLista
-
--- ======================
--- ATENDIMENTOS
--- ======================
-
--- Agendar atendimento
-agendarAtendimento :: [Paciente] -> [Medico] -> [Atendimento] -> IO [Atendimento]
-agendarAtendimento pacientes medicos atendimentos = do
-  putStr "Digite CPF do paciente: " >> hFlush stdout
+excluirPaciente pacientes = do
+  putStr "CPF do paciente a excluir: " >> hFlush stdout
   c <- getLine
   case find (\p -> cpf p == c) pacientes of
-    Nothing -> putStrLn "Dado incorreto! Paciente não encontrado." >> return atendimentos
-    Just pacienteObj -> do
+    Nothing -> putStrLn "[ERRO] Paciente não encontrado." >> return pacientes
+    Just _  -> do
+      let novaLista = filter (\p -> cpf p /= c) pacientes
+      salvarPacientes novaLista
+      putStrLn "[OK] Paciente removido."
+      return novaLista
+
+-- ==========================
+-- MÉDICO
+-- ==========================
+cadastrarMedico :: [Medico] -> IO [Medico]
+cadastrarMedico medicos = do
+  putStrLn "\n=== Cadastro de Médico ==="
+  putStr "Nome do médico: " >> hFlush stdout
+  nomeMed <- getLine
+  putStr "CRM: " >> hFlush stdout
+  crmMed <- getLine
+  putStrLn "Especialidades disponíveis:"
+  mapM_ (\(i,e) -> putStrLn $ show i ++ ") " ++ show e) (zip [1..] todasEspecialidades)
+  putStr "Escolha o número da especialidade: " >> hFlush stdout
+  escolha <- readLn
+  if escolha < 1 || escolha > length todasEspecialidades
+    then putStrLn "[ERRO] Especialidade inválida." >> return medicos
+    else do
+      let espec = todasEspecialidades !! (escolha - 1)
+      putStr "Informe horários base (hh:mm separados por vírgula) ou deixe vazio: " >> hFlush stdout
+      hrs <- getLine
+      let horariosSep = words $ map (\c -> if c == ',' then ' ' else c) hrs
+          novo = Medico nomeMed crmMed espec horariosSep
+          lista = medicos ++ [novo]
+      salvarMedicos lista
+      putStrLn "[OK] Médico cadastrado com sucesso!"
+      return lista
+
+
+excluirMedico :: [Medico] -> IO [Medico]
+excluirMedico medicos = do
+  putStrLn "\n=== Lista de Médicos ==="
+  mapM_ (\(i,m) -> putStrLn $ show i ++ ") " ++ nomeM m ++ " - " ++ show (especialidadeM m))
+        (zip [1..] medicos)
+  putStr "Digite o CRM do médico que deseja excluir: " >> hFlush stdout
+  crmInput <- getLine
+  case find (\m -> crm m == crmInput) medicos of
+    Nothing -> putStrLn "[ERRO] Médico não encontrado." >> return medicos
+    Just _  -> do
+      let novaLista = filter (\m -> crm m /= crmInput) medicos
+      salvarMedicos novaLista
+      putStrLn "[OK] Médico excluído."
+      return novaLista
+
+-- ==========================
+-- ATENDIMENTO (MODO SIMPLES)
+-- ==========================
+agendarConsulta :: Paciente -> [Medico] -> [Atendimento] -> IO [Atendimento]
+agendarConsulta pac medicos atendimentos = do
+  putStrLn "\n=== Agendar Consulta (modo simples) ==="
+  if null medicos
+    then putStrLn "[ERRO] Não há médicos cadastrados." >> return atendimentos
+    else do
       putStrLn "Médicos disponíveis:"
       mapM_ (\(i,m) -> putStrLn $ show i ++ ") " ++ nomeM m ++ " - " ++ show (especialidadeM m))
             (zip [1..] medicos)
       putStr "Escolha o número do médico: " >> hFlush stdout
       escolha <- readLn
       if escolha < 1 || escolha > length medicos
-        then putStrLn "Dado incorreto! Médico inválido." >> return atendimentos
+        then putStrLn "[ERRO] Opção inválida." >> return atendimentos
         else do
           let medicoEscolhido = medicos !! (escolha - 1)
-              horariosDisponiveis = filter (`notElem` [horaAt a | a <- atendimentos, medico a == nomeM medicoEscolhido, status a == Agendada])
-                                     (horarios medicoEscolhido)
-          if null horariosDisponiveis
-            then putStrLn "Dado incorreto! Médico sem horários disponíveis." >> return atendimentos
-            else do
-              putStrLn "Horários disponíveis:" >> mapM_ putStrLn horariosDisponiveis
-              putStr "Escolha o horário (hh:mm): " >> hFlush stdout
-              hora <- getLine
-              putStr "Digite a data (dd/mm/aaaa): " >> hFlush stdout
-              dataC <- getLine
-              putStr "Digite sintomas (opcional): " >> hFlush stdout
-              sint <- getLine
-              let atendimentoNovo = Atendimento (cpf pacienteObj) (nomeM medicoEscolhido) (especialidadeM medicoEscolhido)
-                                                dataC hora (if null sint then Nothing else Just sint) [] Agendada
-                  lista = atendimentos ++ [atendimentoNovo]
-              saveFile "data/atendimentos.db" lista
-              putStrLn "Consulta agendada com sucesso!"
-              return lista
+          putStr "Data da consulta (AAAA-MM-DD): " >> hFlush stdout
+          dataC <- getLine
+          putStr "Hora (HH:MM): " >> hFlush stdout
+          horaC <- getLine
+          putStr "Sintomas (opcional): " >> hFlush stdout
+          sint <- getLine
+          let novoAt = Atendimento
+                { paciente        = cpf pac
+                , medico          = crm medicoEscolhido
+                , especialidade   = especialidadeM medicoEscolhido
+                , dataAt          = dataC
+                , horaAt          = horaC
+                , sintomas        = if null sint then Nothing else Just sint
+                , prescricoes     = []
+                , status          = Agendada
+                , observacao      = Nothing
+                , tipoAtendimento = Consulta
+                }
+              lista = atendimentos ++ [novoAt]
+          salvarAtendimentos lista
+          putStrLn "[OK] Consulta agendada com sucesso!"
+          return lista
 
--- Cancelar atendimento
-cancelarAtendimento :: [Paciente] -> [Atendimento] -> IO [Atendimento]
-cancelarAtendimento pacientes atendimentos = do
-  putStr "Digite CPF do paciente: " >> hFlush stdout
-  c <- getLine
-  case find (\p -> cpf p == c) pacientes of
-    Nothing -> putStrLn "Dado incorreto! Paciente não encontrado." >> return atendimentos
-    Just pacienteObj -> do
-      let consultasPaciente = filter (\a -> paciente a == cpf pacienteObj && status a == Agendada) atendimentos
-      if null consultasPaciente
-        then putStrLn "Dado incorreto! Nenhuma consulta agendada." >> return atendimentos
+cancelarConsulta :: Paciente -> [Atendimento] -> IO [Atendimento]
+cancelarConsulta pac atendimentos = do
+  putStrLn "\n=== Cancelar Consulta ==="
+  let minhas = filter (\a -> paciente a == cpf pac && status a == Agendada) atendimentos
+  if null minhas
+    then putStrLn "Nenhuma consulta encontrada." >> return atendimentos
+    else do
+      mapM_ (\(i,a) -> putStrLn $ show i ++ ") " ++ dataAt a ++ " " ++ horaAt a
+                        ++ " com médico CRM " ++ medico a)
+            (zip [1..] minhas)
+      putStr "Escolha o número da consulta para cancelar: " >> hFlush stdout
+      escolha <- readLn
+      if escolha < 1 || escolha > length minhas
+        then putStrLn "[ERRO] Escolha inválida." >> return atendimentos
         else do
-          mapM_ (\(i,a) -> putStrLn $ show i ++ ") " ++ dataAt a ++ " " ++ horaAt a ++ " com Dr. " ++ medico a)
-                (zip [1..] consultasPaciente)
-          putStr "Escolha o número da consulta a cancelar: " >> hFlush stdout
-          escolha <- readLn
-          if escolha < 1 || escolha > length consultasPaciente
-            then putStrLn "Dado incorreto! Escolha inválida." >> return atendimentos
-            else do
-              let consulta = consultasPaciente !! (escolha - 1)
-                  novaLista = map (\a -> if a == consulta then a {status = Cancelada} else a) atendimentos
-              saveFile "data/atendimentos.db" novaLista
-              putStrLn "Consulta cancelada com sucesso!"
-              return novaLista
+          let consultaSel = minhas !! (escolha - 1)
+              novaLista   = map (\a -> if a == consultaSel
+                                        then a { status = Cancelada }
+                                        else a) atendimentos
+          salvarAtendimentos novaLista
+          putStrLn "[OK] Consulta cancelada."
+          return novaLista
+
+-- ==========================
+-- PRESCRIÇÃO
+-- ==========================
+criarPrescricao
+  :: String      -- CPF do paciente
+  -> String      -- CRM do médico
+  -> String      -- Texto da prescrição
+  -> String      -- Data
+  -> [Prescricao]
+  -> IO [Prescricao]
+criarPrescricao cpfPac crmMed texto dt prescrs = do
+  let nova = Prescricao
+        { prPaciente = cpfPac
+        , prMedico   = crmMed
+        , prData     = dt
+        , prTexto    = texto
+        }
+      lista = nova : prescrs
+  salvarPrescricoes lista
+  putStrLn "[OK] Prescrição salva com sucesso!"
+  return lista

@@ -1,57 +1,139 @@
-module DoctorSchedule where
+module Types where
 
-import Types
-import Data.List (find)
+-- ===============================
+-- ESPECIALIDADES MÉDICAS
+-- ===============================
+data Especialidade
+  = AlergiaEImunologia
+  | Cardiologia
+  | CirurgiaGeral
+  | ClinicaMedica
+  | Dermatologia
+  | Endocrinologia
+  | Fisioterapia
+  | Gastroenterologia
+  | Genetica
+  | GinecologiaEObstetricia
+  | Hematologia
+  | Infectologia
+  | Neurologia
+  | Nutricao
+  | Oftalmologia
+  | OrtopediaETraumatologia
+  | Otorrinolaringologia
+  | Pediatria
+  | Psicologia
+  | Psiquiatria
+  | Reumatologia
+  deriving (Show, Read, Eq, Enum)
 
--- | Gera uma lista de horários com intervalo de 20 min
--- Exemplo: gerarSlots20min "Segunda" "08:00" "16:00"
-gerarSlots20min :: String -> String -> String -> [Slot]
-gerarSlots20min dia inicio fim =
-  let minutosTot = toMin fim
-      go m
-        | m > minutosTot = []
-        | otherwise =
-            let hStr = toHora m
-            in Slot { slDia = dia, slHora = hStr, slLivre = True } : go (m + 20)
-  in go (toMin inicio)
-  where
-    toMin :: String -> Int
-    toMin s =
-      let (h, _:m) = span (/=':') s
-      in read h * 60 + read m
+-- ===============================
+-- STATUS E TIPOS DE ATENDIMENTO
+-- ===============================
+data StatusConsulta = Agendada | Realizada | Cancelada
+  deriving (Show, Read, Eq)
 
-    toHora :: Int -> String
-    toHora m =
-      let h = m `div` 60
-          mm = m `mod` 60
-          h'  = if h < 10 then '0':show h else show h
-          mm' = if mm < 10 then '0':show mm else show mm
-      in h' ++ ":" ++ mm'
+data TipoAtendimento
+  = Consulta
+  | ExameSangue
+  | ExameUrina
+  | ExameFezes
+  | Hemograma
+  | Glicemia
+  | Colesterol
+  | Triglicerideos
+  | Creatinina
+  | Ureia
+  | Eletrocardiograma
+  | Ecocardiograma
+  | Ultrassonografia
+  | RaioX
+  | Tomografia
+  | Ressonancia
+  | Mamografia
+  | DensitometriaOssea
+  | Endoscopia
+  | Colonoscopia
+  | Papanicolau
+  | TesteCOVID
+  | TesteAlergico
+  | Audiometria
+  | Espirometria
+  | EEG
+  | EMG
+  deriving (Show, Read, Eq, Enum)
 
--- | O médico libera um dia (ex.: "Segunda") das 08:00 às 16:00
--- e o sistema cria slots de 20 minutos.
-liberarDiaMedico :: String -> String -> String -> [AgendaMedico] -> [AgendaMedico]
-liberarDiaMedico crm dia hIni hFim agendas =
-  let novosSlots = gerarSlots20min dia hIni hFim
-  in case find (\a -> agMedicoCRM a == crm) agendas of
-       Nothing ->
-         AgendaMedico crm novosSlots : agendas
-       Just ag ->
-         -- Sobrescreve apenas os slots daquele dia
-         let outros = filter (\a -> agMedicoCRM a /= crm) agendas
-             slotsFiltrados = filter (\s -> slDia s /= dia) (agSlots ag)
-             slotsNovos     = slotsFiltrados ++ novosSlots
-         in AgendaMedico crm slotsNovos : outros
+-- ===============================
+-- PRESCRIÇÃO MÉDICA
+-- ===============================
+data Prescricao = Prescricao
+  { prPaciente :: String
+  , prMedico   :: String
+  , prData     :: String
+  , prTexto    :: String
+  } deriving (Show, Read, Eq)
 
--- | Quando o paciente agenda, este horário é marcado como ocupado.
-ocuparSlot :: String -> String -> String -> [AgendaMedico] -> [AgendaMedico]
-ocuparSlot crm dia hora agendas =
-  map atualiza agendas
-  where
-    atualiza ag
-      | agMedicoCRM ag /= crm = ag
-      | otherwise =
-          let slots' = map (\s -> if slDia s == dia && slHora s == hora
-                                  then s { slLivre = False }
-                                  else s) (agSlots ag)
-          in ag { agSlots = slots' }
+-- ===============================
+-- ATENDIMENTO (CONSULTA OU EXAME)
+-- ===============================
+data Atendimento = Atendimento
+  { paciente        :: String
+  , medico          :: String
+  , especialidade   :: Especialidade
+  , dataAt          :: String
+  , horaAt          :: String
+  , sintomas        :: Maybe String
+  , prescricoes     :: [Prescricao]
+  , status          :: StatusConsulta
+  , observacao      :: Maybe String
+  , tipoAtendimento :: TipoAtendimento
+  } deriving (Show, Read, Eq)
+
+-- ===============================
+-- PACIENTES E CONVÊNIOS
+-- ===============================
+data Convenio = Convenio
+  { nomePlano      :: String
+  , numeroCarteira :: String
+  } deriving (Show, Read, Eq)
+
+data Paciente = Paciente
+  { nome      :: String
+  , cpf       :: String
+  , idade     :: Int
+  , senha     :: String
+  , convenio  :: Maybe Convenio
+  , historico :: [Atendimento]
+  } deriving (Show, Read, Eq)
+
+-- ===============================
+-- MÉDICOS
+-- ===============================
+data Medico = Medico
+  { nomeM          :: String
+  , crm            :: String
+  , especialidadeM :: Especialidade
+  , horarios       :: [String]
+  } deriving (Show, Read, Eq)
+
+-- ===============================
+-- AGENDA DE MÉDICO
+-- ===============================
+data Slot = Slot
+  { slDia   :: String
+  , slHora  :: String
+  , slLivre :: Bool
+  } deriving (Show, Read, Eq)
+
+data AgendaMedico = AgendaMedico
+  { agMedicoCRM :: String
+  , agSlots     :: [Slot]
+  } deriving (Show, Read, Eq)
+
+-- ===============================
+-- USUÁRIO DO SISTEMA
+-- ===============================
+data Usuario
+  = Admin String
+  | PacienteUser Paciente
+  deriving (Show, Read, Eq)
