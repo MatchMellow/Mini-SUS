@@ -1,5 +1,5 @@
 module Main where
-
+  
 import Types
 import Persistence
 import MenuAdmin
@@ -9,7 +9,7 @@ import MenuMedico
 -- ponto de entrada do sistema
 main :: IO ()
 main = do
-  putStrLn "=== Mini-SUS: Sistema de Atendimento Simplificado ==="
+  putStrLn "======================= Mini-SUS: Sistema de Atendimento Simplificado ================================================="
   putStrLn "Carregando dados..."
   pacientes    <- carregarPacientes
   medicos      <- carregarMedicos

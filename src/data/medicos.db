@@ -1,0 +1,1 @@
+[Medico {nomeM = "Vitor Sales Silva", crm = "1234 PE", especialidadeM = Cardiologia, horarios = []},Medico {nomeM = "Juliano Santos", crm = "0987 PE", especialidadeM = AlergiaEImunologia, horarios = ["09:00"]}]

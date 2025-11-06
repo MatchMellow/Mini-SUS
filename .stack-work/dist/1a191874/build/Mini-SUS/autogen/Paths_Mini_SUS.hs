@@ -47,7 +47,7 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 bindir     = "C:\\Mini-SUS\\.stack-work\\install\\ea5fe3e3\\bin"
-libdir     = "C:\\Mini-SUS\\.stack-work\\install\\ea5fe3e3\\lib\\x86_64-windows-ghc-9.10.3-b42a\\Mini-SUS-0.1.0.0-BL7IFldQybVKYhpuLvTx7h-Mini-SUS"
+libdir     = "C:\\Mini-SUS\\.stack-work\\install\\ea5fe3e3\\lib\\x86_64-windows-ghc-9.10.3-b42a\\Mini-SUS-0.1.0.0-5bk0YXfk6bEAcMASOoNLQZ-Mini-SUS"
 dynlibdir  = "C:\\Mini-SUS\\.stack-work\\install\\ea5fe3e3\\lib\\x86_64-windows-ghc-9.10.3-b42a"
 datadir    = "C:\\Mini-SUS\\.stack-work\\install\\ea5fe3e3\\share\\x86_64-windows-ghc-9.10.3-b42a\\Mini-SUS-0.1.0.0"
 libexecdir = "C:\\Mini-SUS\\.stack-work\\install\\ea5fe3e3\\libexec\\x86_64-windows-ghc-9.10.3-b42a\\Mini-SUS-0.1.0.0"

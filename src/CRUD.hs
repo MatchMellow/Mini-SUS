@@ -5,9 +5,6 @@ import Persistence
 import Data.List (find)
 import System.IO (hFlush, stdout)
 
--- ==========================
--- lista fixa de especialidades (bate com Types.hs)
--- ==========================
 todasEspecialidades :: [Especialidade]
 todasEspecialidades =
   [ AlergiaEImunologia
@@ -33,9 +30,7 @@ todasEspecialidades =
   , Reumatologia
   ]
 
--- ==========================
--- PACIENTE
--- ==========================
+
 cadastrarPaciente :: [Paciente] -> IO [Paciente]
 cadastrarPaciente pacientes = do
   putStrLn "\n=== Cadastro de Paciente ==="
@@ -81,9 +76,7 @@ excluirPaciente pacientes = do
       putStrLn "[OK] Paciente removido."
       return novaLista
 
--- ==========================
--- MÉDICO
--- ==========================
+
 cadastrarMedico :: [Medico] -> IO [Medico]
 cadastrarMedico medicos = do
   putStrLn "\n=== Cadastro de Médico ==="
@@ -124,9 +117,8 @@ excluirMedico medicos = do
       putStrLn "[OK] Médico excluído."
       return novaLista
 
--- ==========================
--- ATENDIMENTO (MODO SIMPLES)
--- ==========================
+
+
 agendarConsulta :: Paciente -> [Medico] -> [Atendimento] -> IO [Atendimento]
 agendarConsulta pac medicos atendimentos = do
   putStrLn "\n=== Agendar Consulta (modo simples) ==="
@@ -188,9 +180,7 @@ cancelarConsulta pac atendimentos = do
           putStrLn "[OK] Consulta cancelada."
           return novaLista
 
--- ==========================
--- PRESCRIÇÃO
--- ==========================
+
 criarPrescricao
   :: String      -- CPF do paciente
   -> String      -- CRM do médico

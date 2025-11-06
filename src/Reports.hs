@@ -1,9 +1,9 @@
 module Reports where
+  
 import Types
-
 import Data.List (find)
+import Validations (sortAtendimentosByDateTime)
 
--- histórico de um paciente
 mostrarHistorico :: Paciente -> [Atendimento] -> IO ()
 mostrarHistorico pacienteObj atendimentos = do
   let historicoPaciente = filter (\a -> paciente a == cpf pacienteObj) atendimentos
@@ -13,7 +13,7 @@ mostrarHistorico pacienteObj atendimentos = do
       putStrLn $ "\n=== Histórico de " ++ nome pacienteObj ++ " ==="
       mapM_ printAtendimento historicoPaciente
 
--- imprime um atendimento
+
 printAtendimento :: Atendimento -> IO ()
 printAtendimento a = do
   putStrLn $ "Data/Hora: " ++ dataAt a ++ " " ++ horaAt a
@@ -28,7 +28,9 @@ printAtendimento a = do
     Nothing -> return ()
   putStrLn "-----------------------------------------------------------"
 
--- relatório de médicos
+-- ===============================
+-- Relatório de médicos e suas consultas
+-- ===============================
 relatorioMedicos :: [Medico] -> [Atendimento] -> IO ()
 relatorioMedicos medicos atendimentos = do
   putStrLn "\n=== Lista de Médicos ==="
@@ -47,7 +49,8 @@ printMedico atendimentos medicoObj = do
       ) consultas
   putStrLn "---------------------------------------------------------------"
 
--- relatório geral de atendimentos
+-- Relatório geral de atendimentos
+
 relatorioConsultas :: [Atendimento] -> IO ()
 relatorioConsultas atendimentos = do
   putStrLn "\n=== Lista de Consultas e Exames ==="
@@ -55,7 +58,18 @@ relatorioConsultas atendimentos = do
     then putStrLn "Nenhum atendimento registrado."
     else mapM_ printAtendimento atendimentos
 
--- lista TODAS as prescrições
+-- Relatório geral ordenado (por data/hora)
+
+relatorioConsultasOrdenadas :: [Atendimento] -> IO ()
+relatorioConsultasOrdenadas atendimentos = do
+  putStrLn "\n=== Lista de Consultas (ordenadas por data/hora) ==="
+  let ordenadas = sortAtendimentosByDateTime atendimentos
+  if null ordenadas
+    then putStrLn "Nenhum atendimento registrado."
+    else mapM_ printAtendimento ordenadas
+
+-- Lista TODAS as prescrições
+
 listarTodasPrescricoes :: [Prescricao] -> IO ()
 listarTodasPrescricoes [] = putStrLn "Nenhuma prescrição registrada."
 listarTodasPrescricoes ps = do
@@ -69,7 +83,7 @@ listarTodasPrescricoes ps = do
       putStrLn $ "→ " ++ prTexto p
       putStrLn "-----------------------------------------------------------"
 
--- prescrições de um paciente específico
+
 listarPrescricoesDoPaciente :: String -> [Prescricao] -> IO ()
 listarPrescricoesDoPaciente cpfPaciente prescrs = do
   let minhas = filter (\p -> prPaciente p == cpfPaciente) prescrs
@@ -79,7 +93,7 @@ listarPrescricoesDoPaciente cpfPaciente prescrs = do
       putStrLn "\n=== Minhas Prescrições ==="
       mapM_ (\p -> putStrLn (prData p ++ " - " ++ prTexto p ++ " (Médico: " ++ prMedico p ++ ")")) minhas
 
--- agenda de um médico
+
 listarAgendaMedico :: String -> [AgendaMedico] -> IO ()
 listarAgendaMedico crmMed agendas =
   case find (\a -> agMedicoCRM a == crmMed) agendas of

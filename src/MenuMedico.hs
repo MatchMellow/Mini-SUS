@@ -1,5 +1,5 @@
 module MenuMedico where
-
+  
 import Types
 import Reports
 import DoctorSchedule

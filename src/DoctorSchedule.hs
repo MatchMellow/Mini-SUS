@@ -1,5 +1,5 @@
 module DoctorSchedule where
-
+  
 import Types
 import Persistence
 import Data.List (find)

@@ -68,7 +68,6 @@ agendarConsulta pacienteObj medicos atendimentos agendas = do
               putStrLn "[OK] Consulta agendada com sucesso!"
               return (novosAtendimentos, agendasAtualizadas)
 
--- cancelar uma consulta já agendada
 cancelarConsulta
   :: Paciente
   -> [Atendimento]
@@ -88,12 +87,8 @@ cancelarConsulta pacienteObj atendimentos agendas = do
         then putStrLn "[ERRO] Opção inválida." >> return (atendimentos, agendas)
         else do
           let consultaSel = minhas !! (escolha - 1)
-          -- atualiza atendimentos: muda status para Cancelada
           let atendimentosAtualizados =
                 map (\a -> if a == consultaSel then a { status = Cancelada } else a) atendimentos
-          -- agora precisamos liberar o slot na agenda deste médico
-          -- aqui a gente precisa do DIA DA SEMANA que foi usado, mas no atendimento só temos a DATA (2025-11-03)
-          -- então vamos liberar pelo horário, NÃO recriando o dia todo
 
           let agendasAtualizadas =
                 desocuparSlot (medico consultaSel) (horaAt consultaSel) agendas

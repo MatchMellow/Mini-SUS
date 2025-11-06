@@ -1,8 +1,6 @@
 module Types where
-
--- ===============================
+  
 -- ESPECIALIDADES MÉDICAS
--- ===============================
 data Especialidade
   = AlergiaEImunologia
   | Cardiologia
@@ -27,9 +25,7 @@ data Especialidade
   | Reumatologia
   deriving (Show, Read, Eq, Enum)
 
--- ===============================
--- STATUS E TIPOS DE ATENDIMENTO
--- ===============================
+
 data StatusConsulta = Agendada | Realizada | Cancelada
   deriving (Show, Read, Eq)
 
@@ -63,9 +59,6 @@ data TipoAtendimento
   | EMG
   deriving (Show, Read, Eq, Enum)
 
--- ===============================
--- PRESCRIÇÃO MÉDICA
--- ===============================
 data Prescricao = Prescricao
   { prPaciente :: String
   , prMedico   :: String
@@ -73,9 +66,7 @@ data Prescricao = Prescricao
   , prTexto    :: String
   } deriving (Show, Read, Eq)
 
--- ===============================
--- ATENDIMENTO (CONSULTA OU EXAME)
--- ===============================
+
 data Atendimento = Atendimento
   { paciente        :: String
   , medico          :: String
@@ -89,9 +80,6 @@ data Atendimento = Atendimento
   , tipoAtendimento :: TipoAtendimento
   } deriving (Show, Read, Eq)
 
--- ===============================
--- PACIENTES E CONVÊNIOS
--- ===============================
 data Convenio = Convenio
   { nomePlano      :: String
   , numeroCarteira :: String
@@ -106,9 +94,6 @@ data Paciente = Paciente
   , historico :: [Atendimento]
   } deriving (Show, Read, Eq)
 
--- ===============================
--- MÉDICOS
--- ===============================
 data Medico = Medico
   { nomeM          :: String
   , crm            :: String
@@ -116,9 +101,7 @@ data Medico = Medico
   , horarios       :: [String]
   } deriving (Show, Read, Eq)
 
--- ===============================
--- AGENDA DE MÉDICO
--- ===============================
+--  slot para médicos de 20 e 20 min
 data Slot = Slot
   { slDia   :: String
   , slHora  :: String
@@ -130,9 +113,7 @@ data AgendaMedico = AgendaMedico
   , agSlots     :: [Slot]
   } deriving (Show, Read, Eq)
 
--- ===============================
--- USUÁRIO DO SISTEMA
--- ===============================
+-- tipo usuario
 data Usuario
   = Admin String
   | PacienteUser Paciente

@@ -1,26 +1,28 @@
 C:\Mini-SUS\CHANGELOG.md:
   hash: 0b46ba80b71ae2ddb8054eb18dcc664c4266a3536fdec15403ddcc5a88186a48
 C:\Mini-SUS\Mini-SUS.cabal:
-  hash: 53ea457b748976fce2639fb295afb0ecf802a2a8f4195c631cc211d6896341f0
+  hash: 0b43ff026f614223aba15b7ce19ab857784d3a7343af980bb8bac4e5b200813d
 C:\Mini-SUS\README.md:
-  hash: d2d9c4b3e26d6d09948e945a3b34b2f6638459e763725c255d1ccc5eff6fcaf8
+  hash: ada819657ce28641613a36433b9e8187c077849fc9ff4f0f5365a8adb6c318dc
 C:\Mini-SUS\src\CRUD.hs:
-  hash: c80138be7a1b87c14e3a5f2641d59c67084a35b2e98f49630ca445348a3bbd67
+  hash: bb89fc6bc4eb3436ac32b77018417de1959d21540bd453542a202d8d6c4a8561
 C:\Mini-SUS\src\DoctorSchedule.hs:
-  hash: b6f06f1c8e56aceb2c4c7039b6792f915061b3b36dfb863536b43ae83af07701
+  hash: 05cd11e0493ce58686493e240b270ae5cc981aaf9b973a985b0b3769e3c25b1d
 C:\Mini-SUS\src\Main.hs:
-  hash: 5924777acc1a176c43020657de4cf202132e7de2b3519178a02f07c2e5499b5b
+  hash: 0e61082f61900425cd8b759174586abfd1ad3387530b3a645ba5286e2e089dad
 C:\Mini-SUS\src\MenuAdmin.hs:
-  hash: 2ad4d9f3a8dba911a11aa8d8d576c490d0ba62f672b336e3592b0786600bceb6
+  hash: 8afb342c1a78f3a97fb911de89f979913aa3b860d5759b0f4bb0f1033382978f
 C:\Mini-SUS\src\MenuMedico.hs:
-  hash: 76ec2f572a2bf71b158e32d4de462347fefed5f329eecf10a94c4fba190de979
+  hash: 6413a677dd353181b3a485d9ed8641a0093852318774b2ab64b242e40ac6fb2e
 C:\Mini-SUS\src\MenuPaciente.hs:
-  hash: e6f48d27d9ee0ac689eba95ea1b7fa7f3c6690049d01b366f035ecbcaa6413f2
+  hash: 72a7688eb0a5093a0a81721808d6ddbbb1de8f4cd86cad1963ee2d48a772d6c8
 C:\Mini-SUS\src\Persistence.hs:
   hash: b21b72d99e99587f12b6005f9ecf851422523663d738530b98583e345093444f
 C:\Mini-SUS\src\Reports.hs:
-  hash: 8ddb76b79d71595574e04f53d8b5dd7e2dc657e31ebcae071ab854a7c3a15a7d
+  hash: 89149d31a92dd3e3028d3dad4da36548776c5bfdc6021b872493676d969bc6d9
 C:\Mini-SUS\src\Scheduling.hs:
-  hash: d1f3453cedb2ff18396388d8cd4102bc90b7cefb0b2c27539db6b23608e80c31
+  hash: b1934dc6503e3af8c3f956566f589e8aa9e4e50ec8530169a17866e45fa1dd8c
 C:\Mini-SUS\src\Types.hs:
-  hash: 57a160a0ebef6453087148d669fa6fbf90f578c7fe1cc0e129e9ae90a6510488
+  hash: 41dd0dc2c5ee677f15afacd9f599f565d86a9ff362a5117610be569a6a0f2bde
+C:\Mini-SUS\src\Validations.hs:
+  hash: d82ef9068785519aebcea0b6621cb0523271df08bca96e07fefa1faa9d1fe125

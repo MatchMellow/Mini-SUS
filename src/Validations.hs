@@ -19,12 +19,9 @@ import Data.Maybe (isJust, fromMaybe)
 import Data.List (sortOn)
 import Data.Time
 import Data.Time.Format (defaultTimeLocale, parseTimeM)
-
-
 putAsk :: String -> IO ()
 putAsk s = putStr s >> hFlush stdout
 
--- prompt genérico com parser. Retorna Nothing se usuário digitar Q/q (voltar).
 promptWith :: String -> (String -> Maybe a) -> IO (Maybe a)
 promptWith label parser = do
   putAsk label

@@ -1,12 +1,15 @@
 module MenuPaciente where
 
 import Types
-import qualified CRUD            as CR
+import qualified CRUD as CR
 import Persistence
 import Reports
+import Validations
 import Data.List (find)
+import Data.Time
+import System.IO (hFlush, stdout)
+import Data.Char (toUpper)
 
--- menu inicial do paciente (login/cadastro)
 menuPaciente
   :: [Paciente]
   -> [Medico]
@@ -17,20 +20,35 @@ menuPaciente
 menuPaciente pacientes medicos atendimentos prescricoes agendas = do
   putStrLn "\n=== Menu do Paciente ==="
   putStrLn "1) Fazer login"
-  putStrLn "2) Cadastrar-se"
-  putStrLn "q) Voltar"
-  putStr   "Escolha: "
+  putStrLn "2) Abrir chamado de cadastro (em vez de auto-cadastro)"
+  putStrLn "Q) Voltar"
+  putStr   "Escolha: " >> hFlush stdout
   op <- getLine
-  case op of
+  case map toUpper op of
     "1" -> loginPaciente pacientes medicos atendimentos prescricoes agendas
-    "2" -> do
-      pacientes' <- CR.cadastrarPaciente pacientes
-      menuPaciente pacientes' medicos atendimentos prescricoes agendas
-    "q" -> putStrLn "Voltando..."
+    "2" -> abrirChamadoCadastro >> menuPaciente pacientes medicos atendimentos prescricoes agendas
+    "Q" -> putStrLn "Voltando..."
     _   -> putStrLn "Opção inválida!" >>
             menuPaciente pacientes medicos atendimentos prescricoes agendas
 
--- login
+-- abrir chamado simples para cadastro (em vez de auto-cadastro)
+abrirChamadoCadastro :: IO ()
+abrirChamadoCadastro = do
+  putStrLn "\n=== Abrir Chamado de Cadastro ==="
+  mNome <- promptNonEmpty "Seu nome completo (ou Q para voltar): "
+  case mNome of
+    Nothing   -> putStrLn "Voltando..."
+    Just nome -> do
+      mCPF <- promptCPF "Seu CPF (11 dígitos, ou Q para voltar): "
+      case mCPF of
+        Nothing   -> putStrLn "Voltando..."
+        Just cpf' -> do
+          appendFile "data/chamados-cadastro.log" (nome ++ " | CPF " ++ cpf' ++ "\n")
+          putStrLn "[OK] Chamado registrado. A gestão entrará em contato."
+
+-- ============================
+-- Login (3 tentativas + Q)
+-- ============================
 loginPaciente
   :: [Paciente]
   -> [Medico]
@@ -40,18 +58,25 @@ loginPaciente
   -> IO ()
 loginPaciente pacientes medicos atendimentos prescricoes agendas = do
   putStrLn "\n=== Login do Paciente ==="
-  putStr "CPF: "
-  cpfInput <- getLine
-  putStr "Senha: "
-  senhaInput <- getLine
-  case find (\p -> cpf p == cpfInput && senha p == senhaInput) pacientes of
-    Nothing -> do
-      putStrLn "[ERRO] CPF ou senha inválidos."
-      menuPaciente pacientes medicos atendimentos prescricoes agendas
-    Just pac ->
-      menuPacienteLogado pac pacientes medicos atendimentos prescricoes agendas
+  let tentativa :: Int -> IO ()
+      tentativa 0 = putStrLn "Por favor, contate a gestão de acessos para regularizar seu login."
+      tentativa n = do
+        mCPF <- promptCPF "CPF (11 dígitos, ou Q para voltar): "
+        case mCPF of
+          Nothing -> putStrLn "Voltando..."
+          Just c  -> do
+            putStr "Senha: " >> hFlush stdout
+            s <- getLine
+            case find (\p -> cpf p == c && senha p == s) pacientes of
+              Just pac -> menuPacienteLogado pac pacientes medicos atendimentos prescricoes agendas
+              Nothing  -> do
+                putStrLn "[ERRO] CPF ou senha inválidos."
+                tentativa (n - 1)
+  tentativa 3
 
--- depois que loga
+-- ============================
+-- Menu logado do Paciente
+-- ============================
 menuPacienteLogado
   :: Paciente
   -> [Paciente]
@@ -68,44 +93,41 @@ menuPacienteLogado pac pacientes medicos atendimentos prescricoes agendas = do
   putStrLn "4) Ver prescrições"
   putStrLn "5) Ver consultas futuras"
   putStrLn "0) Sair"
-  putStr   "Escolha: "
+  putStrLn "Q) Voltar"
+  putStr   "Escolha: " >> hFlush stdout
   op <- getLine
-  case op of
-    -- agenda usando o CRUD (modo simples)
+  case map toUpper op of
+    -- agendar (modo simples do CRUD)
     "1" -> do
-      atendimentos' <- CR.agendarConsulta pac medicos atendimentos
+      at' <- CR.agendarConsulta pac medicos atendimentos
       putStrLn "[OK] Consulta agendada!"
-      menuPacienteLogado pac pacientes medicos atendimentos' prescricoes agendas
+      menuPacienteLogado pac pacientes medicos at' prescricoes agendas
 
-    -- cancela usando o CRUD
+    -- cancelar
     "2" -> do
-      atendimentos' <- CR.cancelarConsulta pac atendimentos
+      at' <- CR.cancelarConsulta pac atendimentos
       putStrLn "[OK] Consulta cancelada!"
-      menuPacienteLogado pac pacientes medicos atendimentos' prescricoes agendas
+      menuPacienteLogado pac pacientes medicos at' prescricoes agendas
 
     -- histórico
-    "3" -> do
-      mostrarHistorico pac atendimentos
-      menuPacienteLogado pac pacientes medicos atendimentos prescricoes agendas
+    "3" -> mostrarHistorico pac atendimentos >> loop
 
     -- prescrições do paciente
-    "4" -> do
-      listarPrescricoesDoPaciente (cpf pac) prescricoes
-      menuPacienteLogado pac pacientes medicos atendimentos prescricoes agendas
+    "4" -> listarPrescricoesDoPaciente (cpf pac) prescricoes >> loop
 
-    -- consultas futuras
+    -- futuras (considera data e HORA atuais)
     "5" -> do
-      putStrLn "\n=== Consultas Futuras ==="
-      let futuras =
-            filter (\a -> paciente a == cpf pac && status a == Agendada) atendimentos
+      tz  <- getCurrentTimeZone
+      now <- utcToLocalTime tz <$> getCurrentTime
+      let futuras = filter (\a -> status a == Agendada && isUpcomingRelativeTo now a)
+                           atendimentos
       if null futuras
         then putStrLn "Você não possui consultas futuras."
         else mapM_ (\a ->
-              putStrLn $
-                "- " ++ dataAt a ++ " " ++ horaAt a
-                ++ " com médico CRM " ++ medico a
+              putStrLn $ "- " ++ dataAt a ++ " " ++ horaAt a
+                       ++ " com médico CRM " ++ medico a
             ) futuras
-      menuPacienteLogado pac pacientes medicos atendimentos prescricoes agendas
+      loop
 
     -- sair e salvar
     "0" -> do
@@ -116,5 +138,10 @@ menuPacienteLogado pac pacientes medicos atendimentos prescricoes agendas = do
       salvarAgendas agendas
       putStrLn "Saindo... até logo!"
 
-    _   -> putStrLn "Opção inválida!" >>
-            menuPacienteLogado pac pacientes medicos atendimentos prescricoes agendas
+    -- voltar
+    "Q" -> putStrLn "Voltando..."
+
+    -- inválida
+    _   -> putStrLn "Opção inválida!" >> loop
+  where
+    loop = menuPacienteLogado pac pacientes medicos atendimentos prescricoes agendas
